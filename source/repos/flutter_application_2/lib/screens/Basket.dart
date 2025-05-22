@@ -64,7 +64,7 @@ class _finalBasketPageState extends State<finalBasketPage> {
         });
 
         print("products");
-        print(products[0].title);
+        print(products[0].ID);
       } else {
         throw Exception("Error: ${data["message"]}");
       }
@@ -116,6 +116,7 @@ class _finalBasketPageState extends State<finalBasketPage> {
                           SizedBox(
                             height: 0,
                             child: FinalBasketItem(
+                              ProductId: products[i].ID,
                               title: products[i].title,
                               count: products[i].count.toString(),
                               imageName: products[i].imageName,

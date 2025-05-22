@@ -1,10 +1,65 @@
 import 'package:flutter/material.dart';
- 
+
+class AvailableCountText extends StatelessWidget {
+  int? count;
+  final VoidCallback onButtonPressed;
+
+  AvailableCountText({this.count, required this.onButtonPressed, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    print("Count: $count");
+    if (count == 0) {
+      return Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 173, 28, 9).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color.fromARGB(255, 155, 48, 6),
+              width: 2,
+            ),
+          ),
+          child: Text(
+            "ناموجود",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 116, 16, 16),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return ElevatedButton.icon(
+        onPressed: () {
+          onButtonPressed();
+        },
+        icon: Icon(Icons.shopping_cart, size: 10, color: Colors.white),
+        label: Text(
+          "افزودن به سبد خرید",
+          style: TextStyle(fontSize: 12, color: Colors.white,fontWeight: FontWeight.bold),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueAccent,
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+     
+    }
+  }
+}
+
 class BasketItem extends StatelessWidget {
   final String title;
   final String description;
   final String price;
   final String imageName;
+  final int count;
   final VoidCallback onButtonPressed;
 
   BasketItem({
@@ -13,6 +68,7 @@ class BasketItem extends StatelessWidget {
     required this.description,
     required this.price,
     required this.imageName,
+    required this.count,
     super.key,
   }) {
     print({imageName + title});
@@ -63,16 +119,9 @@ class BasketItem extends StatelessWidget {
                     color: Colors.blueAccent,
                   ),
                 ),
-                IconButton(
-                  onPressed: onButtonPressed,
-                  icon: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: const Icon(Icons.add, color: Colors.white, size: 20),
-                  ),
+                AvailableCountText(
+                  count: count,
+                  onButtonPressed: onButtonPressed,
                 ),
               ],
             ),

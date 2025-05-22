@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/models/products.dart';
+import 'package:flutter_application_2/models/productcount.dart';
 import 'package:flutter_application_2/Widgets/BasketItem.dart';
 import 'package:flutter_application_2/screens/Basket.dart';
 
@@ -16,7 +16,7 @@ class BasketPage extends StatefulWidget {
 
 class _BasketPageState extends State<BasketPage> {
   String? username;
-  List<Products> products = [];
+  List<Product_Count> products = [];
 
   _BasketPageState() {
     fetchProducts();
@@ -38,7 +38,12 @@ class _BasketPageState extends State<BasketPage> {
       headers: {"Content-Type": "application/json"},
       body: jsonBody, // Ensure proper formatting
     );
-
+     Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => finalBasketPage(),
+                        ),
+                      );
     print("Server Response: ${response.body}"); // Debug response from PHP
   }
 
@@ -63,8 +68,8 @@ class _BasketPageState extends State<BasketPage> {
         print("ok");
         setState(() {
           products =
-              jsonList.map<Products>((json) {
-                return Products.fromJson(json);
+              jsonList.map<Product_Count>((json) {
+                return Product_Count.fromJson(json);
               }).toList();
         });
 
@@ -98,26 +103,34 @@ class _BasketPageState extends State<BasketPage> {
         child: Column(
           children: [
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.6,
-                ),
-                itemCount: products.length,
-                itemBuilder: (context, i) {
-                  return SizedBox(
-                    height: 450,
-                    child: BasketItem(
-                      onButtonPressed: () => updateBasket(products[i].ID),
-                      title: products[i].title,
-                      description: products[i].description,
-                      price: products[i].price,
-                      imageName: products[i].imageName,
-                    ),
-                  );
-                },
+              child: LayoutBuilder(
+                 builder: (context, constraints) {
+                  // Dynamically set number of items per row based on screen size
+                  int crossAxisCount = constraints.maxWidth > 1000 ? 4 : 2;
+
+                  return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.6,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, i) {
+                    return SizedBox(
+                      height: 450,
+                      child: BasketItem(
+                        onButtonPressed: () => updateBasket(products[i].ID),
+                        title: products[i].title,
+                        description: products[i].description,
+                        price: products[i].price,
+                        imageName: products[i].imageName,
+                        count: products[i].count,
+                      ),
+                    );
+                  },
+                );
+                 }
               ),
             ),
             Container(
