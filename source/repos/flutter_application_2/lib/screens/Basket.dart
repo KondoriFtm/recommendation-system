@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/models/productCount.dart';
 import 'package:flutter_application_2/Widgets/FinalBasketItem.dart';
+import 'package:flutter_application_2/screens/PurchaseHistory.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class finalBasketPage extends StatefulWidget {
-  finalBasketPage({super.key});
+  const finalBasketPage({super.key});
 
   @override
   State<finalBasketPage> createState() => _finalBasketPageState();
@@ -23,13 +24,16 @@ class _finalBasketPageState extends State<finalBasketPage> {
   }
 
   Future<bool> hasActiveBasket() async {
+       
+    print(username);
     var response = await http.post(
       Uri.parse('http://192.168.1.104/myprojects/checkBasket.php'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username}),
     );
-
+    print(response.statusCode);
     var data = jsonDecode(response.body);
+    print(data);
     return data["hasBasket"] == true; // Returns true if an active basket exists
   }
 
@@ -51,7 +55,8 @@ class _finalBasketPageState extends State<finalBasketPage> {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"username": username}),
     );
-    if (response.statusCode == 200) {
+     if (response.statusCode == 200) {
+      print(response.body);
       final data = jsonDecode(response.body);
       print(data);
       if (data["status"] == "success") {
@@ -64,8 +69,7 @@ class _finalBasketPageState extends State<finalBasketPage> {
         });
 
         print("products");
-        print(products[0].ID);
-      } else {
+       } else {
         throw Exception("Error: ${data["message"]}");
       }
     } else {
@@ -97,32 +101,60 @@ class _finalBasketPageState extends State<finalBasketPage> {
       body: FutureBuilder<bool>(
         future: hasActiveBasket(),
         builder: (context, snapshot) {
-          if (!snapshot.data!) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // ✅ Show loading spinner
+          }
+          if (snapshot.hasError) {
+            return Text("Error loading basket status"); // ✅ Handle errors
+          }
+
+          if (snapshot.data == false) { 
             // Handle the case where there is no active basket or data is not loaded yet
-            return const Center(child: Text('No active basket found.'));
-          } else {
+            return const Center(child: Text('سبد خرید شما نهایی شد '));
+          }  
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.6,
-                      children: [
-                        for (int i = 0; i < products.length; i++)
-                          SizedBox(
-                            height: 0,
-                            child: FinalBasketItem(
-                              ProductId: products[i].ID,
-                              title: products[i].title,
-                              count: products[i].count.toString(),
-                              imageName: products[i].imageName,
-                            ),
-                          ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Dynamically set number of items per row based on screen size
+                        int crossAxisCount =
+                            constraints.maxWidth > 1000 ? 4 : 2;
+
+                        return GridView.count(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.7,
+                          children: [
+                            for (int i = 0; i < products.length; i++)
+                              SizedBox(
+                                height: 0,
+                                child: FinalBasketItem(
+                                  ProductId: products[i].ID,
+                                  title: products[i].title,
+                                  count: products[i].count.toString(),
+                                  imageName: products[i].imageName,
+                                  onDelete: (deletedProductId) {
+                                    setState(() {
+                                      products.removeWhere(
+                                        (item) => item.ID == deletedProductId,
+                                      );
+                                    });
+                                  },
+                                  ReCalPrice: () {
+                                    setState(() {
+                                      get_user_prods();
+                                      totalprice();
+                                    });
+                                  },
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   Container(
@@ -140,7 +172,7 @@ class _finalBasketPageState extends State<finalBasketPage> {
                         ElevatedButton(
                           onPressed: () {
                             FinilizePurchase();
-                          },
+                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent,
                             padding: const EdgeInsets.symmetric(
@@ -156,13 +188,37 @@ class _finalBasketPageState extends State<finalBasketPage> {
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BasketHistoryPage(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "basket history",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
             );
-          }
+          
         },
       ),
     );

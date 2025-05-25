@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BasketPage extends StatefulWidget {
-  BasketPage({super.key});
+  const BasketPage({super.key});
 
   @override
   State<BasketPage> createState() => _BasketPageState();
@@ -64,19 +64,14 @@ class _BasketPageState extends State<BasketPage> {
 
       if (data["status"] == "success") {
         List<dynamic> jsonList = data["products"];
-        print(jsonList);
-        print("ok");
-        setState(() {
+         setState(() {
           products =
               jsonList.map<Product_Count>((json) {
                 return Product_Count.fromJson(json);
               }).toList();
         });
 
-        print("object");
-        print(
-          "Final Decoded Products List: ${products.map((p) => p.title).toList()}",
-        );
+          
       } else {
         print("Error: ${data["message"]}");
       }

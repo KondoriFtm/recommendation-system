@@ -8,12 +8,17 @@ class FinalBasketItem extends StatefulWidget {
   final String title;
   final String count;
   final String imageName;
+  final Function(int) onDelete; 
+  final Function() ReCalPrice; 
+
 
   const FinalBasketItem({
     required this.ProductId,
     required this.title,
     required this.count,
     required this.imageName,
+    required this.onDelete,
+    required this.ReCalPrice,
     super.key,
   });
 
@@ -30,6 +35,33 @@ class _FinalBasketItemState extends State<FinalBasketItem> {
     super.initState();
     count = widget.count;
   }
+  Future<void> DeleteItem(int productId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    username = prefs.getString('UserName') ?? "Guest"; // Retrieve username
+    print("Username: $username");
+    print(productId);
+    final jsonBody = jsonEncode({
+      "username": username,
+      "product_id": productId,
+    });
+
+ 
+    final response = await http.post(
+      Uri.parse('http://192.168.1.104/myprojects/DeleteItem.php'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonBody,
+    );
+
+    print("Server Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data["status"] == "success") {
+        widget.onDelete(productId); // Call the delete function
+      }
+    }
+  }
+
 
   Future<void> ChangeCount(int productId, String mode) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -59,6 +91,7 @@ class _FinalBasketItemState extends State<FinalBasketItem> {
           count = data["total_count"].toString();
           print("Updated Count: $count");
         });
+        widget.ReCalPrice();  
       }
     }
   }
@@ -122,6 +155,21 @@ class _FinalBasketItemState extends State<FinalBasketItem> {
                   ),
                 ),
               ],
+            ),
+            Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [IconButton(
+                onPressed: () => DeleteItem(widget.ProductId),
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(Icons.delete, color: Colors.white, size: 20),
+                ),
+              ),]
             ),
           ],
         ),
