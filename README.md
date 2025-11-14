@@ -1,16 +1,15 @@
-# recommendation-system
 # 📊 Hybrid Graph-Based Recommendation System with Cold-Start Handling
 
 ## Overview
-This project builds upon a graph-based hybrid recommendation system (GHRS) originally proposed in [Reference Article]. While the original method performs well on global metrics like RMSE, Precision, and Recall, it struggles with top-N ranking metrics such as **Precision@k** and **Recall@k**.
+This project extends the [GHRS model](https://www.sciencedirect.com/science/article/abs/pii/S0957417422003025) proposed by Zamanzadeh Darban and Valipour, which combines graph-based features, clustering, and side information to recommend movies. While the original method performs well on RMSE, Precision, and Recall, it lacks strength in top-N ranking metrics like **Precision@k** and **Recall@k**.
 
-To address this, I designed a hybrid strategy that introduces an additional signal and focuses on optimizing Precision@k and Recall@k — metrics that are increasingly emphasized in recent recommendation system research.
+To address this, I implemented a hybrid strategy that introduces an additional signal and focuses on optimizing Precision@k and Recall@k — metrics that are increasingly emphasized in recent recommendation system research. I also designed a cold-start scenario using KNN imputation based on demographic similarity.
 
 ---
 
 ## 🔍 Key Contributions
 
-- **Hybrid Enhancement**: Augmented the GHRS scoring formula with a new signal to boost top-N metrics.
+- **Top-N Ranking Optimization**: Enhanced the GHRS scoring formula to improve Precision@k and Recall@k.
 - **Cold-Start Scenario**: Simulated new users with no rating history using manual splits of the MovieLens dataset.
 - **KNN Imputation**: Estimated missing graph features for cold-start users using KNN based on demographic similarity.
 - **Metric-Focused Evaluation**: Prioritized Precision@k and Recall@k over RMSE to align with modern recommendation benchmarks.
